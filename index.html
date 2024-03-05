@@ -99,7 +99,7 @@
                 peerId = id;
             });
             peer.on('error', function(err) {
-                alert(''+err);
+                alert('' + err);
             });
         };
         
@@ -112,9 +112,7 @@
             init();
             peer.on('open', function() {
                 var destId = document.getElementById('GameIdInput').value;
-                conn = peer.connect(destId, {
-                    reliable: true
-                });
+                conn = peer.connect(destId);
                 conn.on('open', function() {
                     opponent.peerId = destId;
                     begin();
@@ -124,6 +122,23 @@
 
         function begin() {
             alert('hit begin()');
+            conn.on('data', function(data) {
+                switch(data[0]) {
+                    case 'move':
+                        if(turn) {
+                            return;
+                        }
+                        var i = data[1];
+
+                        // do something with data received from opponent;
+                };
+            });
+            conn.on('close', function() {
+                // connection closed - game over :(
+            });
+            peer.on('error', function(err) {
+                alert('' + err);
+            });
         };
 
       </script>
