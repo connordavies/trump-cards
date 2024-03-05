@@ -65,34 +65,67 @@
       </main>
       
       <script type="text/javascript">
+
+        var peer = null;
+        var peerId = null;
+        var conn = null;
+        var opponent = {
+            peerId: null
+        };
+
         const createGame = document.getElementById('CreateGame');
         createGame.onclick = () => {
-            var peer = new Peer();
-            peer.on('open', function(id) {
-                alert("Game ID is " + id);
-                document.getElementById('GameId').innerHTML = "Game ID: " + id;
-            });
+            create();
+        };
 
-            peer.on('connection', function(conn) {
-                conn.on('open', function(data) {
-                    console.log('Received', data);
-                });
+        function create() {
+            init();
+            peer.on('open', function() {
+                document.getElementById('GameId').innerHTML = "Game ID: " + peerId;
+            });
+            peer.on('connection', function(c) {
+               if(conn) {
+                c.close();
+                return;
+               }
+               conn = c;
+               begin();
+            });
+        };
+
+        function init() {
+            peer = new Peer();
+            peer.on('open', function(id) {
+                peerId = id;
+            });
+            peer.on('error', function(err) {
+                alert(''+err);
             });
         };
         
         const joinGame = document.getElementById('JoinGame');
         joinGame.onclick = () => {
-            var peer = new Peer();
-            peer.on('open', function(_) {
-                var id = document.getElementById('GameIdInput').value;
-                alert("Attempting to join game " + id + "...");
-                var conn = peer.connect(id);
-                conn.on('open', function(data) {
-                    console.log('Received', data);
+            join();
+        };
+
+        function join() {
+            init();
+            peer.on('open', function() {
+                var destId = document.getElementById('GameIdInput').value;
+                conn = peer.connect(destId, {
+                    reliable: true
                 });
-                conn.send('Hello!');
+                conn.on('open', function() {
+                    opponent.peerId = destId;
+                    begin();
+                });
             });
         };
+
+        function begin() {
+            alert('hit begin()');
+        };
+
       </script>
   </body>
 </html>
