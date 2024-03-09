@@ -73,6 +73,29 @@
             peerId: null
         };
 
+        var creator = false;
+
+        var cards = [];
+        cards[0] = {name: "First Card", stats: [14, 9, 14, 12, 11, 5]};
+        cards[1] = {name: "Second Card", stats: [19, 3, 4, 16, 20, 17]};
+        cards[2] = {name: "Third Card", stats: [15, 5, 14, 19, 17, 6]};
+        cards[3] = {name: "Fourth Card", stats: [11, 2, 18, 4, 2, 14]};
+        cards[4] = {name: "Fifth Card", stats: [18, 11, 7, 11, 16, 18]};
+        cards[5] = {name: "Sixth Card", stats: [5, 18, 6, 14, 7, 9]};
+
+        var myCards;
+        var theirCards;
+
+        var myCard;
+        var theirCard;
+
+        function shuffle(array) {
+            for(let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
         const createGame = document.getElementById('CreateGame');
         createGame.onclick = () => {
             create();
@@ -89,6 +112,7 @@
                 return;
                }
                conn = c;
+               creator = true;
                begin();
             });
         };
@@ -121,16 +145,25 @@
         };
 
         function begin() {
-            alert('hit begin()');
+            console.log('hit begin()');
+
+            if(creator) {
+                shuffle(cards);
+                myCards = cards.slice(0, 3);
+                theirCards = cards.slice(3, 6);
+
+                // give p2 their first card
+
+                theirCard = theirCards.shift();
+                myCard = myCards.shift();
+
+                conn.send(['card', theirCard]);
+            }
+
             conn.on('data', function(data) {
                 switch(data[0]) {
-                    case 'move':
-                        if(turn) {
-                            return;
-                        }
-                        var i = data[1];
-
-                        // do something with data received from opponent;
+                    case 'card':
+                        alert("received card: " + data[1]);
                 };
             });
             conn.on('close', function() {
